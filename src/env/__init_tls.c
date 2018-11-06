@@ -16,7 +16,7 @@ int __init_tp(void *p)
 	if (r < 0) return -1;
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
-	td->tid = __syscall(SYS_set_tid_address, &td->detach_state);
+// 	td->tid = __syscall(SYS_set_tid_address, &td->detach_state);
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
 	return 0;
@@ -74,6 +74,8 @@ typedef Elf64_Phdr Phdr;
 
 extern weak hidden const size_t _DYNAMIC[];
 
+extern void* __mythos_get_tlsmem(unsigned long);
+
 static void static_init_tls(size_t *aux)
 {
 	unsigned char *p;
@@ -125,16 +127,7 @@ static void static_init_tls(size_t *aux)
 		+ MIN_TLS_ALIGN-1 & -MIN_TLS_ALIGN;
 
 	if (libc.tls_size > sizeof builtin_tls) {
-#ifndef SYS_mmap2
-#define SYS_mmap2 SYS_mmap
-#endif
-		mem = (void *)__syscall(
-			SYS_mmap2,
-			0, libc.tls_size, PROT_READ|PROT_WRITE,
-			MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
-		/* -4095...-1 cast to void * will crash on dereference anyway,
-		 * so don't bloat the init code checking for error codes and
-		 * explicitly calling a_crash(). */
+        mem = __mythos_get_tlsmem(libc.tls_size);
 	} else {
 		mem = builtin_tls;
 	}
