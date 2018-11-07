@@ -74,7 +74,7 @@ typedef Elf64_Phdr Phdr;
 
 extern weak hidden const size_t _DYNAMIC[];
 
-extern void* __mythos_get_tlsmem(unsigned long);
+extern weak void* __mythos_get_tlsmem(unsigned long);
 
 static void static_init_tls(size_t *aux)
 {
