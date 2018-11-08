@@ -1,7 +1,4 @@
-#include "pthread_impl.h"
-
-weak int __set_thread_area(void *p);
-
+// #include "pthread_impl.h"
 // int __set_thread_area(void *p)
 // {
 // #ifdef SYS_set_thread_area

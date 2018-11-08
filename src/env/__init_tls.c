@@ -8,6 +8,8 @@
 #include "atomic.h"
 #include "syscall.h"
 
+weak int __set_thread_area(void *p);
+
 int __init_tp(void *p)
 {
 	pthread_t td = p;
