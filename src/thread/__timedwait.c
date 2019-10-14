@@ -36,8 +36,8 @@ int __timedwait(volatile int *addr, int val,
 	clockid_t clk, const struct timespec *at, int priv)
 {
 	int cs, r;
-	__pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 	r = __timedwait_cp(addr, val, clk, at, priv);
-	__pthread_setcancelstate(cs, 0);
+	pthread_setcancelstate(cs, 0);
 	return r;
 }
