@@ -22,6 +22,12 @@ static void *dummy_1(void *p)
 }
 weak_alias(dummy_1, __start_sched);
 
+void dummyunmapself(void *base, size_t size){
+	__unmapself(base, size);
+}
+
+weak_alias(dummyunmapself,unmapself);
+
 _Noreturn void __pthread_exit(void *result)
 {
 	pthread_t self = __pthread_self();
@@ -30,7 +36,6 @@ _Noreturn void __pthread_exit(void *result)
 	self->canceldisable = 1;
 	self->cancelasync = 0;
 	self->result = result;
-
 	while (self->cancelbuf) {
 		void (*f)(void *) = self->cancelbuf->__f;
 		void *x = self->cancelbuf->__x;
@@ -111,14 +116,20 @@ _Noreturn void __pthread_exit(void *result)
 
 		/* The following call unmaps the thread's stack mapping
 		 * and then exits without touching the stack. */
-		__unmapself(self->map_base, self->map_size);
+		unmapself(self->map_base, self->map_size);
 	}
+
 
 	/* After the kernel thread exits, its tid may be reused. Clear it
 	 * to prevent inadvertent use and inform functions that would use
 	 * it that it's no longer available. */
+
 	self->tid = 0;
 	UNLOCK(self->killlock);
+
+	uint32_t* futex = &self->detach_state;
+	a_store(&self->detach_state, DT_EXITED);
+	__wake(futex, 1, 1);
 
 	for (;;) __syscall(SYS_exit, 0);
 }
@@ -250,7 +261,6 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			stack_limit = map + guard;
 		}
 	}
-
 	new = __copy_tls(tsd - libc.tls_size);
 	new->map_base = map;
 	new->map_size = size;
@@ -283,7 +293,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	new->CANARY = self->CANARY;
 
 	a_inc(&libc.threads_minus_1);
-	ret = __clone((c11 ? start_c11 : start), stack, flags, new, &new->tid, TP_ADJ(new), &new->detach_state);
+	ret = clone((c11 ? start_c11 : start), stack, flags, new, &new->tid, TP_ADJ(new), &new->detach_state);
 
 	__release_ptc();
 
@@ -293,7 +303,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 
 	if (ret < 0) {
 		a_dec(&libc.threads_minus_1);
-		if (map) __munmap(map, size);
+		if (map) munmap(map, size);
 		return EAGAIN;
 	}
 
