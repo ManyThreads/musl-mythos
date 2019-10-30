@@ -166,10 +166,10 @@ _Noreturn void __pthread_exit(void *result)
 	self->tid = 0;
 	UNLOCK(self->killlock);
 
-  // @todo this probably has changed to thread list lock
-	uint32_t* futex = &self->detach_state;
-	a_store(&self->detach_state, DT_EXITED);
-	__wake(futex, 1, 1);
+	// this would be done by the Linux kernel
+	// see the line in env/__init_tls.c: td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
+	// and in pthread_create(): clone(...) the &__thread_list_lock as ctid argument
+	__tl_unlock();
 
 	for (;;) __syscall(SYS_exit, 0);
 }
