@@ -290,7 +290,7 @@ void *malloc(size_t n)
 
 	if (n > MMAP_THRESHOLD) {
 		size_t len = n + OVERHEAD + PAGE_SIZE - 1 & -PAGE_SIZE;
-		char *base = __mmap(0, len, PROT_READ|PROT_WRITE,
+		char *base = mmap(0, len, PROT_READ|PROT_WRITE,
 			MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 		if (base == (void *)-1) return 0;
 		c = (void *)(base + SIZE_ALIGN - OVERHEAD);
@@ -492,16 +492,16 @@ void __bin_chunk(struct chunk *self)
 	self->prev->next = self;
 
 	/* Replace middle of large chunks with fresh zero pages */
-	if (reclaim) {
-		uintptr_t a = (uintptr_t)self + SIZE_ALIGN+PAGE_SIZE-1 & -PAGE_SIZE;
-		uintptr_t b = (uintptr_t)next - SIZE_ALIGN & -PAGE_SIZE;
-#if 1
-		__madvise((void *)a, b-a, MADV_DONTNEED);
-#else
-		__mmap((void *)a, b-a, PROT_READ|PROT_WRITE,
-			MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-#endif
-	}
+	/*if (reclaim) {*/
+		/*uintptr_t a = (uintptr_t)self + SIZE_ALIGN+PAGE_SIZE-1 & -PAGE_SIZE;*/
+		/*uintptr_t b = (uintptr_t)next - SIZE_ALIGN & -PAGE_SIZE;*/
+/*#if 1*/
+		/*__madvise((void *)a, b-a, MADV_DONTNEED);*/
+/*#else*/
+		/*mmap((void *)a, b-a, PROT_READ|PROT_WRITE,*/
+			/*MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);*/
+/*#endif*/
+	/*}*/
 
 	unlock_bin(i);
 }
@@ -513,7 +513,7 @@ static void unmap_chunk(struct chunk *self)
 	size_t len = CHUNK_SIZE(self) + extra;
 	/* Crash on double free */
 	if (extra & 1) a_crash();
-	__munmap(base, len);
+	munmap(base, len);
 }
 
 void free(void *p)

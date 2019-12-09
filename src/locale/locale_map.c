@@ -78,7 +78,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 		if (map) {
 			new = malloc(sizeof *new);
 			if (!new) {
-				__munmap((void *)map, map_size);
+				munmap((void *)map, map_size);
 				break;
 			}
 			new->map = map;

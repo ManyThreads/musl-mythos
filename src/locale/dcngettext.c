@@ -194,7 +194,7 @@ notrans:
 
 		p = calloc(sizeof *p, 1);
 		if (!p) {
-			__munmap((void *)map, map_size);
+			munmap((void *)map, map_size);
 			goto notrans;
 		}
 		p->cat = category;

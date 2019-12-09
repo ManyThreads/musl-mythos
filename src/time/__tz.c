@@ -132,7 +132,7 @@ static void do_tzset()
 
 	for (i=0; i<5; i++) r0[i] = r1[i] = 0;
 
-	if (zi) __munmap((void *)zi, map_size);
+	if (zi) munmap((void *)zi, map_size);
 
 	/* Cache the old value of TZ to check if it has changed. Avoid
 	 * free so as not to pull it into static programs. Growth
@@ -170,7 +170,7 @@ static void do_tzset()
 		if (!map) s = __utc;
 	}
 	if (map && (map_size < 44 || memcmp(map, "TZif", 4))) {
-		__munmap((void *)map, map_size);
+		munmap((void *)map, map_size);
 		map = 0;
 		s = __utc;
 	}
