@@ -12,6 +12,9 @@
 volatile int __thread_list_lock;
 weak int __set_thread_area(void *p);
 
+extern weak void* __mythos_get_tlsmem(unsigned long);
+extern weak int __mythos_get_start_tid();
+
 int __init_tp(void *p)
 {
 	pthread_t td = p;
@@ -20,7 +23,7 @@ int __init_tp(void *p)
 	if (r < 0) return -1;
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
-	td->tid = 3; // mythos::init::EC, was __syscall(SYS_set_tid_address, &__thread_list_lock);
+	td->tid = __mythos_get_start_tid(); // mythos::init::EC, was __syscall(SYS_set_tid_address, &__thread_list_lock);
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
 	td->sysinfo = __sysinfo;
@@ -80,7 +83,6 @@ typedef Elf64_Phdr Phdr;
 
 extern weak hidden const size_t _DYNAMIC[];
 
-extern weak void* __mythos_get_tlsmem(unsigned long);
 
 static void static_init_tls(size_t *aux)
 {

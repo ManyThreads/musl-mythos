@@ -79,6 +79,8 @@ int pthread_detach(pthread_t);
 _Noreturn void pthread_exit(void *);
 int pthread_join(pthread_t, void **);
 
+int mythos_get_pthread_tid(pthread_t pthread);
+
 #ifdef __GNUC__
 __attribute__((const))
 #endif
