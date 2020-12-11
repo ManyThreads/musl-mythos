@@ -35,6 +35,15 @@ typedef struct mcontext_t {
 	union __riscv_mc_fp_state __fpregs;
 } mcontext_t;
 
+#if defined(_GNU_SOURCE)
+#define REG_PC 0
+#define REG_RA 1
+#define REG_SP 2
+#define REG_TP 4
+#define REG_S0 8
+#define REG_A0 10
+#endif
+
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 typedef unsigned long greg_t;
 typedef unsigned long gregset_t[32];
@@ -51,10 +60,10 @@ struct sigaltstack {
 	size_t ss_size;
 };
 
-typedef struct ucontext_t
+typedef struct __ucontext
 {
 	unsigned long uc_flags;
-	struct ucontext_t *uc_link;
+	struct __ucontext *uc_link;
 	stack_t uc_stack;
 	sigset_t uc_sigmask;
 	mcontext_t uc_mcontext;
