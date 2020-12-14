@@ -185,7 +185,7 @@ static void *__expand_heap(size_t *pn)
 
 	size_t min = (size_t)PAGE_SIZE << mmap_step/2;
 	if (n < min) n = min;
-	void *area = __mmap(0, n, PROT_READ|PROT_WRITE,
+	void *area = mmap(0, n, PROT_READ|PROT_WRITE,
 		MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 	if (area == MAP_FAILED) return 0;
 	*pn = n;

@@ -33,7 +33,7 @@
 
 #define brk(p) ((uintptr_t)__syscall(SYS_brk, p))
 
-#define mmap __mmap
+//#define mmap __mmap
 #define madvise __madvise
 #define mremap __mremap
 
