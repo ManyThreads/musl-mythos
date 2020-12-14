@@ -96,7 +96,6 @@ struct fdpic_dummy_loadmap {
 #define DYN_CNT 32
 
 typedef void (*stage2_func)(unsigned char *, size_t *);
-typedef void (*stage3_func)(size_t *);
 
 hidden void *__dlsym(void *restrict, const char *restrict, void *restrict);
 
@@ -105,5 +104,10 @@ hidden int __dl_invalid_handle(void *);
 hidden void __dl_vseterr(const char *, va_list);
 
 hidden ptrdiff_t __tlsdesc_static(), __tlsdesc_dynamic();
+
+hidden extern int __malloc_replaced;
+hidden extern int __aligned_alloc_replaced;
+hidden void __malloc_donate(char *, char *);
+hidden int __malloc_allzerop(void *);
 
 #endif
