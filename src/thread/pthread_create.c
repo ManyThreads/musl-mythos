@@ -174,7 +174,7 @@ _Noreturn void __pthread_exit(void *result)
 	/* After the kernel thread exits, its tid may be reused. Clear it
 	 * to prevent inadvertent use and inform functions that would use
 	 * it that it's no longer available. */
-	self->tid = 0;
+	/*self->tid = 0;*/
 	UNLOCK(self->killlock);
 
 	// this would be done by the Linux kernel

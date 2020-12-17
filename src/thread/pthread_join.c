@@ -6,6 +6,7 @@ static void dummy1(pthread_t t)
 {
 }
 weak_alias(dummy1, __tl_sync);
+weak_alias(dummy1, mythos_pthread_cleanup);
 
 static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec *at)
 {
@@ -21,7 +22,10 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 	if (r == ETIMEDOUT || r == EINVAL) return r;
 	__tl_sync(t);
 	if (res) *res = t->result;
-	if (t->map_base) munmap(t->map_base, t->map_size);
+	if (t->map_base){
+    mythos_pthread_cleanup(t);
+    munmap(t->map_base, t->map_size);
+  }
 	return 0;
 }
 
