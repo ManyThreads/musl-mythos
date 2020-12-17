@@ -2,6 +2,7 @@
 #define _INTERNAL_SYSCALL_H
 
 #include <features.h>
+#include <errno.h>
 #include <sys/syscall.h>
 #include "syscall_arch.h"
 
@@ -57,15 +58,22 @@ hidden long __syscall_ret(unsigned long),
 #define __syscall_cp(...) __SYSCALL_DISP(__syscall_cp,__VA_ARGS__)
 #define syscall_cp(...) __syscall_ret(__syscall_cp(__VA_ARGS__))
 
-#ifndef SYSCALL_USE_SOCKETCALL
-#define __socketcall(nm,a,b,c,d,e,f) __syscall(SYS_##nm, a, b, c, d, e, f)
-#define __socketcall_cp(nm,a,b,c,d,e,f) __syscall_cp(SYS_##nm, a, b, c, d, e, f)
-#else
-#define __socketcall(nm,a,b,c,d,e,f) __syscall(SYS_socketcall, __SC_##nm, \
-    ((long [6]){ (long)a, (long)b, (long)c, (long)d, (long)e, (long)f }))
-#define __socketcall_cp(nm,a,b,c,d,e,f) __syscall_cp(SYS_socketcall, __SC_##nm, \
-    ((long [6]){ (long)a, (long)b, (long)c, (long)d, (long)e, (long)f }))
+static inline long __alt_socketcall(int sys, int sock, int cp, long a, long b, long c, long d, long e, long f)
+{
+	long r;
+	if (cp) r = __syscall_cp(sys, a, b, c, d, e, f);
+	else r = __syscall(sys, a, b, c, d, e, f);
+	if (r != -ENOSYS) return r;
+#ifdef SYS_socketcall
+	if (cp) r = __syscall_cp(SYS_socketcall, sock, ((long[6]){a, b, c, d, e, f}));
+	else r = __syscall(SYS_socketcall, sock, ((long[6]){a, b, c, d, e, f}));
 #endif
+	return r;
+}
+#define __socketcall(nm, a, b, c, d, e, f) __alt_socketcall(SYS_##nm, __SC_##nm, 0, \
+	(long)(a), (long)(b), (long)(c), (long)(d), (long)(e), (long)(f))
+#define __socketcall_cp(nm, a, b, c, d, e, f) __alt_socketcall(SYS_##nm, __SC_##nm, 1, \
+	(long)(a), (long)(b), (long)(c), (long)(d), (long)(e), (long)(f))
 
 /* fixup legacy 16-bit junk */
 
@@ -193,6 +201,45 @@ hidden long __syscall_ret(unsigned long),
 #define SYS_sendfile SYS_sendfile64
 #endif
 
+#ifndef SYS_timer_settime
+#define SYS_timer_settime SYS_timer_settime32
+#endif
+
+#ifndef SYS_timer_gettime
+#define SYS_timer_gettime SYS_timer_gettime32
+#endif
+
+#ifndef SYS_timerfd_settime
+#define SYS_timerfd_settime SYS_timerfd_settime32
+#endif
+
+#ifndef SYS_timerfd_gettime
+#define SYS_timerfd_gettime SYS_timerfd_gettime32
+#endif
+
+#ifndef SYS_clock_settime
+#define SYS_clock_settime SYS_clock_settime32
+#endif
+
+#ifndef SYS_clock_gettime
+#define SYS_clock_gettime SYS_clock_gettime32
+#endif
+
+#ifndef SYS_clock_getres
+#define SYS_clock_getres SYS_clock_getres_time32
+#endif
+
+#ifndef SYS_clock_nanosleep
+#define SYS_clock_nanosleep SYS_clock_nanosleep_time32
+#endif
+
+#ifndef SYS_gettimeofday
+#define SYS_gettimeofday SYS_gettimeofday_time32
+#endif
+
+#ifndef SYS_settimeofday
+#define SYS_settimeofday SYS_settimeofday_time32
+#endif
 
 /* Ensure that the plain syscall names are defined even for "time64-only"
  * archs. These facilitate callers passing null time arguments, and make
@@ -299,12 +346,25 @@ hidden long __syscall_ret(unsigned long),
 #define __SC_recvmmsg    19
 #define __SC_sendmmsg    20
 
+/* This is valid only because all socket syscalls are made via
+ * socketcall, which always fills unused argument slots with zeros. */
+#ifndef SYS_accept
+#define SYS_accept SYS_accept4
+#endif
+
 #ifndef SO_RCVTIMEO_OLD
 #define SO_RCVTIMEO_OLD  20
 #endif
 #ifndef SO_SNDTIMEO_OLD
 #define SO_SNDTIMEO_OLD  21
 #endif
+
+#define SO_TIMESTAMP_OLD    29
+#define SO_TIMESTAMPNS_OLD  35
+#define SO_TIMESTAMPING_OLD 37
+#define SCM_TIMESTAMP_OLD    SO_TIMESTAMP_OLD
+#define SCM_TIMESTAMPNS_OLD  SO_TIMESTAMPNS_OLD
+#define SCM_TIMESTAMPING_OLD SO_TIMESTAMPING_OLD
 
 #ifndef SIOCGSTAMP_OLD
 #define SIOCGSTAMP_OLD 0x8906
