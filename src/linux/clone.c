@@ -17,5 +17,6 @@ int clone(int (*func)(void *), void *stack, int flags, void *arg, ...)
 	ctid = va_arg(ap, pid_t *);
 	va_end(ap);
 
+  while(1);
 	return __syscall_ret(__clone(func, stack, flags, arg, ptid, tls, ctid));
 }

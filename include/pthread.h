@@ -78,11 +78,21 @@ extern "C" {
 
 
 int pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict);
+
+typedef enum {
+  CREATE_FAIL = 0,
+  CREATE_FORCE = 1,
+  CREATE_DEMAND = 2
+} pthread_core_alloc_t;
+
+int mythos_pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict, pthread_core_alloc_t);
+
 int pthread_detach(pthread_t);
 _Noreturn void pthread_exit(void *);
 int pthread_join(pthread_t, void **);
 
 int mythos_get_pthread_tid(pthread_t pthread);
+int mythos_revoke_demand(pthread_t pthread);
 
 #ifdef __GNUC__
 __attribute__((const))
