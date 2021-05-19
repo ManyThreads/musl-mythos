@@ -164,8 +164,10 @@ _Noreturn void __pthread_exit(void *result)
 
 		/* The following call unmaps the thread's stack mapping
 		 * and then exits without touching the stack. */
+    __tl_unlock();
 		unmapself(self->map_base, self->map_size);
-	}
+	}else{
+  }
 
 	/* Wake any joiner. */
 	a_store(&self->detach_state, DT_EXITED);
