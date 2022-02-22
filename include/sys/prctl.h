@@ -154,6 +154,13 @@ struct prctl_mm_map {
 #define PR_PAC_APDBKEY (1UL << 3)
 #define PR_PAC_APGAKEY (1UL << 4)
 
+#define PR_SET_TAGGED_ADDR_CTRL 55
+#define PR_GET_TAGGED_ADDR_CTRL 56
+#define PR_TAGGED_ADDR_ENABLE (1UL << 0)
+
+#define PR_SET_IO_FLUSHER 57
+#define PR_GET_IO_FLUSHER 58
+
 int prctl (int, ...);
 
 #ifdef __cplusplus

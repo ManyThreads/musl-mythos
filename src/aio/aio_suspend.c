@@ -3,6 +3,7 @@
 #include <time.h>
 #include "atomic.h"
 #include "pthread_impl.h"
+#include "aio_impl.h"
 
 int aio_suspend(const struct aiocb *const cbs[], int cnt, const struct timespec *ts)
 {
@@ -73,4 +74,6 @@ int aio_suspend(const struct aiocb *const cbs[], int cnt, const struct timespec 
 	}
 }
 
+#if !_REDIR_TIME64
 weak_alias(aio_suspend, aio_suspend64);
+#endif
